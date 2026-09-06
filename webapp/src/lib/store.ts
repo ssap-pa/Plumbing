@@ -3,7 +3,10 @@ import path from "node:path";
 import type { Database, Site } from "./types";
 
 // 단일 운영자용 JSON 파일 저장소. DATA_DIR 환경변수로 위치를 바꿀 수 있다.
-const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
+// Vercel 같은 서버리스 환경은 프로젝트 폴더가 읽기 전용이므로 /tmp 를 쓴다(인스턴스가 바뀌면 사라짐).
+const DATA_DIR =
+  process.env.DATA_DIR || (process.env.VERCEL ? "/tmp/plumbing-data" : path.join(process.cwd(), "data"));
+export const IS_EPHEMERAL = !process.env.DATA_DIR && Boolean(process.env.VERCEL);
 const DB_FILE = path.join(DATA_DIR, "db.json");
 export const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 

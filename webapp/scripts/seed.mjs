@@ -2,10 +2,7 @@
 // 사용: npm run seed
 import fs from "node:fs";
 import path from "node:path";
-
-const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
-const DB = path.join(DATA_DIR, "db.json");
-fs.mkdirSync(DATA_DIR, { recursive: true });
+import { fileURLToPath } from "node:url";
 
 let n = 0;
 const id = (p) => `${p}seed${(++n).toString(36).padStart(3, "0")}`;
@@ -92,9 +89,20 @@ const s3 = site(
   [cost("waste", "도기 폐기물 처리", 25000), cost("transport", "유류비", 10000)],
 );
 
-const db = fs.existsSync(DB) ? JSON.parse(fs.readFileSync(DB, "utf8")) : { sites: [] };
-const existing = new Set(db.sites.map((s) => s.name));
-const add = [s1, s2, s3].filter((s) => !existing.has(s.name));
-db.sites.push(...add);
-fs.writeFileSync(DB, JSON.stringify(db, null, 2));
-console.log(`샘플 현장 ${add.length}건 추가 → ${DB}`);
+/** 샘플 현장 3건. 호출할 때마다 새 id를 만든다. */
+export function buildSampleSites() {
+  return [s1, s2, s3].map((s) => ({ ...s, id: id("s"), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }));
+}
+
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
+  const DB = path.join(DATA_DIR, "db.json");
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  const db = fs.existsSync(DB) ? JSON.parse(fs.readFileSync(DB, "utf8")) : { sites: [] };
+  const existing = new Set(db.sites.map((s) => s.name));
+  const add = buildSampleSites().filter((s) => !existing.has(s.name));
+  db.sites.push(...add);
+  fs.writeFileSync(DB, JSON.stringify(db, null, 2));
+  console.log(`샘플 현장 ${add.length}건 추가 → ${DB}`);
+}

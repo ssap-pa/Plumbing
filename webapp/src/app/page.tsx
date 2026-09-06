@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { listSites } from "@/lib/store";
+import { IS_EPHEMERAL, listSites } from "@/lib/store";
+import { SeedButton } from "@/components/SeedButton";
 import { analyzeSite } from "@/lib/analysis";
 import { SITE_STATUS_LABEL } from "@/lib/types";
 import { hours, pct, won } from "@/lib/format";
@@ -32,6 +33,11 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {IS_EPHEMERAL && (
+        <div className="rounded-md border border-warn/30 bg-warn-soft px-4 py-2 text-xs text-warn">
+          체험용 배포입니다. 데이터는 서버 임시 저장소에 있어 일정 시간이 지나면 초기화될 수 있습니다.
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <Stat label="견적 공급가액 합계" value={won(quoteSum)} />
         <Stat label="실행비 합계" value={won(execSum)} sub="자재비 + 경비" />
@@ -44,7 +50,8 @@ export default function Dashboard() {
       <Card title="현장 목록">
         {rows.length === 0 ? (
           <Empty>
-            아직 등록된 현장이 없습니다. <Link href="/sites/new" className="text-accent underline">견적서를 업로드</Link>해 첫 현장을 만드세요.
+            <p>아직 등록된 현장이 없습니다. <Link href="/sites/new" className="text-accent underline">견적서를 업로드</Link>해 첫 현장을 만드세요.</p>
+            <div className="mt-3"><SeedButton /></div>
           </Empty>
         ) : (
           <div className="overflow-x-auto">
