@@ -155,14 +155,27 @@ async def build(spec, publish):
         await shot(pg, "publish_panel.png")
         if not publish:
             print("DRY RUN: stopping before 발행 확인"); return None
+        # log publish traffic
+        def on_resp(r):
+            import re as _re
+            if not _re.search(r'\.(js|css|png|gif|woff2?|svg|jpg|cur|json)(\?|$)', r.url) and "nlog" not in r.url:
+                print("  PUB RESP", r.status, r.url[:130])
+        pg.on("response", on_resp)
+        pg.on("requestfailed", lambda r: print("  PUB REQFAIL", r.url[:130], r.failure))
         await pg.locator("button.confirm_btn__WEaBq").first.click()
-        try:
-            await pg.wait_for_url(re.compile(r"blog\.naver\.com/violentgun/\d+|PostView|logNo="), timeout=60000)
-        except Exception: pass
-        await pg.wait_for_timeout(3000)
-        print("after publish url:", pg.url)
+        await pg.wait_for_timeout(9000)
         await shot(pg, "after_publish.png")
-        return pg.url
+        print("after publish url:", pg.url)
+        # verify via authenticated title list
+        import json as _json, urllib.parse as _up
+        r = await bot.ctx.request.get("https://blog.naver.com/PostTitleListAsync.naver?blogId=violentgun&viewdate=&currentPage=1&categoryNo=0&countPerPage=5", headers={"Referer":"https://blog.naver.com/violentgun"})
+        try:
+            data = _json.loads(await r.text())
+            top = data["postList"][0]
+            print("VERIFY newest logNo:", top["logNo"], "openType:", top["openType"], "title:", _up.unquote_plus(top["title"])[:60])
+            return top["logNo"]
+        except Exception as e:
+            print("verify parse fail:", str(e)[:120]); return pg.url
 
 if __name__ == "__main__":
     spec = json.load(open(sys.argv[1], encoding="utf-8"))

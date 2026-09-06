@@ -32,7 +32,7 @@ class Bot:
     async def __aenter__(self):
         self.p = await async_playwright().start()
         self.b = await self.p.chromium.launch(executable_path="/opt/pw-browsers/chromium", headless=self.headless,
-            proxy={"server": "http://127.0.0.1:38591"}, args=["--no-sandbox", "--disable-http2", "--disable-quic"])
+            proxy={"server": os.environ.get("HTTPS_PROXY", "http://127.0.0.1:38591")}, args=["--no-sandbox", "--disable-http2", "--disable-quic"])
         self.ctx = await self.b.new_context(user_agent=UA, locale="ko-KR", viewport={"width": 1400, "height": 900},
                                             accept_downloads=False)
         await self.ctx.add_cookies(load_cookies())
@@ -56,6 +56,15 @@ class Bot:
                 print("UPLOAD relayed", fname, len(data), "->", resp.status)
                 await route.fulfill(response=resp); return
             resp = await self.ctx.request.fetch(request, max_redirects=0, timeout=90000)
+            if "RabbitWrite.naver" in request.url:
+                try:
+                    b = await resp.body()
+                    body = request.post_data_buffer or b""
+                    open(os.path.join(SCRATCH,"rw_req.txt"),"wb").write(body)
+                    hdrs = "\n".join("%s: %s" % (k, v) for k, v in request.headers.items())
+                    open(os.path.join(SCRATCH,"rw_meta.txt"),"w",encoding="utf-8").write("URL %s\nLEN %d\nHEADERS\n%s\nRESP %d %r\nBODY_TAIL %r\n" % (request.url, len(body), hdrs, resp.status, b[:400], body[-1200:]))
+                except Exception as _e:
+                    print("cap fail", _e)
             loc = resp.headers.get("location")
             if 300 <= resp.status < 400 and loc:
                 from urllib.parse import urljoin

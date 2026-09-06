@@ -1,4 +1,6 @@
 tools/cookies.txt
 tools/*.png
 tools/*.log
+tools/rw_*.txt
+tools/pub_resp.txt
 tools/gojan_post.json
