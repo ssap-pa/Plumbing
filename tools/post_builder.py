@@ -99,6 +99,21 @@ async def insert_images(bot, pg, files, caption):
         await cap.click(); await pg.keyboard.type(caption, delay=8)
         await pg.wait_for_timeout(300)
 
+async def insert_link_image(bot, pg, file, link, caption):
+    await insert_images(bot, pg, [file], caption)
+    img = pg.locator(".se-component.se-image").last
+    await img.scroll_into_view_if_needed(); await img.click(); await pg.wait_for_timeout(600)
+    await pg.locator("button.se-link-toolbar-button").first.click(); await pg.wait_for_timeout(700)
+    inp = pg.locator("input.se-custom-layer-link-input").first
+    await inp.click(); await inp.fill(link); await pg.wait_for_timeout(300)
+    await pg.locator("button.se-custom-layer-link-apply-button").first.click(); await pg.wait_for_timeout(800)
+    # verify persisted
+    await img.click(); await pg.wait_for_timeout(300)
+    await pg.locator("button.se-link-toolbar-button").first.click(); await pg.wait_for_timeout(500)
+    val = await pg.evaluate("() => { const i=document.querySelector('input.se-custom-layer-link-input'); return i? i.value:''; }")
+    print("  linkimage link set:", val)
+    await pg.keyboard.press("Escape")
+
 async def build(spec, publish):
     async with Bot() as bot:
         pg = await bot.page()
@@ -117,6 +132,8 @@ async def build(spec, publish):
                 await focus_last_paragraph(pg); await insert_map(pg, b["query"], b.get("pick"))
             elif t == "images":
                 await focus_last_paragraph(pg); await insert_images(bot, pg, b["files"], b.get("caption"))
+            elif t == "linkimage":
+                await focus_last_paragraph(pg); await insert_link_image(bot, pg, b["file"], b["link"], b.get("caption"))
             await dismiss(pg)
         comps = await pg.evaluate("() => Array.from(document.querySelectorAll('.se-component')).map(c=>c.className.split(' ').filter(x=>/^se-(text|image|map|placesMap|horizontalLine|imageStrip|imageGroup|documentTitle|oglink|quotation)$/.test(x)).join(' ')).filter(Boolean)")
         print("components:", comps)

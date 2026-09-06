@@ -16,3 +16,9 @@
 - 최종 발행 요청 `RabbitWrite.naver`는 `ncpt.naver.com` 자동화 방지 토큰 검증을 요구하며, 자동화 브라우저 요청은 `{"isSuccess":false,"errorCode":"no privilege"}`로 거부됨. 임시저장(RabbitAutoSaveWrite)에는 이 검증이 없어 성공.
 - 따라서 이 스크립트는 글 전체를 임시저장 상태까지 만들어 두고, 최종 "발행"은 사용자가 브라우저에서 직접 클릭한다. `--publish`는 검증을 통과하지 못하므로 사용하지 않는다.
 - 이어쓰기: 네이버 블로그 글쓰기 진입 시 "작성 중이던 글이 있습니다" 안내에서 불러오면 제목·본문·사진·지도가 복원된다. 카테고리(설비)·공개설정(비공개)·태그는 발행 창에서 다시 지정 후 발행.
+
+## 전화 버튼(이미지 tel 링크) — 2026-09-06 추가
+- 배너 이미지를 본문 중간에 넣고, 이미지 선택 → "링크 입력 열기"(se-link-toolbar-button) → se-custom-layer-link-input에 tel:010-... 입력 → se-custom-layer-link-apply-button 클릭.
+- 에디터는 tel: 링크를 저장한다(재열기 시 값 유지 확인). 모바일에서 이미지를 누르면 전화 연결.
+- post_builder.py 블록 타입 linkimage: {"type":"linkimage","file":"img/cta.png","link":"tel:010-5863-4044"}.
+- CTA 배너는 make_spec.py가 쓰는 img/cta.png (한글 폰트 wqy-zenhei로 생성).
