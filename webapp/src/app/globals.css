@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f6f8;
+  --foreground: #16181d;
+  --card: #ffffff;
+  --border: #e3e6eb;
+  --muted: #6b7280;
+  --accent: #1d4ed8;
+  --accent-soft: #e8efff;
+  --positive: #047857;
+  --positive-soft: #e6f6ef;
+  --negative: #b91c1c;
+  --negative-soft: #fdecec;
+  --warn: #b45309;
+  --warn-soft: #fff4e5;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-negative: var(--negative);
+  --color-negative-soft: var(--negative-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+}
+
+html { color-scheme: light; }
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+input, select, textarea { font: inherit; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+/* 편집 가능한 표 셀 */
+.cell-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  background: transparent;
+}
+.cell-input:hover { border-color: var(--border); background: #fff; }
+.cell-input:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px var(--accent-soft); }
